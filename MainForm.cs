@@ -112,9 +112,24 @@ public class MainForm : Form
         toolsMenu.DropDownItems.Add(_menuSettings);
 
         var helpMenu = new ToolStripMenuItem("Help");
-        var helpItem = new ToolStripMenuItem("Dell TechDirect API Setup...");
-        helpItem.Click += ShowHelp;
-        helpMenu.DropDownItems.Add(helpItem);
+
+        var aboutItem = new ToolStripMenuItem("About Dell Warranty Scanner...");
+        aboutItem.Click += (_, _) => { using var f = new AboutForm(Icon); f.ShowDialog(this); };
+
+        var checkUpdatesItem = new ToolStripMenuItem("Check for Updates...");
+        checkUpdatesItem.Click += async (_, _) => await CheckForUpdatesAsync(userTriggered: true);
+
+        var apiSetupItem = new ToolStripMenuItem("Dell TechDirect API Setup...");
+        apiSetupItem.Click += ShowHelp;
+
+        helpMenu.DropDownItems.AddRange(new ToolStripItem[]
+        {
+            aboutItem,
+            new ToolStripSeparator(),
+            checkUpdatesItem,
+            new ToolStripSeparator(),
+            apiSetupItem
+        });
 
         menu.Items.AddRange(new ToolStripItem[] { fileMenu, toolsMenu, helpMenu });
         MainMenuStrip = menu;
@@ -950,6 +965,78 @@ public class MainForm : Form
         picker.AcceptButton = okBtn;
         if (picker.ShowDialog(this) == DialogResult.OK && combo.SelectedIndex >= 0)
             _txtIpRange.Text = subnets[combo.SelectedIndex].Cidr;
+    }
+
+    private async Task CheckForUpdatesAsync(bool userTriggered)
+    {
+        const string apiUrl      = "https://api.github.com/repos/kbaker827/DellWarrantyScanner/releases/latest";
+        const string releasesUrl = "https://github.com/kbaker827/DellWarrantyScanner/releases";
+
+        var current = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version
+                      ?? new Version(1, 0, 0);
+
+        if (userTriggered)
+            UpdateStatus("Checking for updates...");
+
+        try
+        {
+            using var http = new System.Net.Http.HttpClient();
+            http.Timeout = TimeSpan.FromSeconds(10);
+            http.DefaultRequestHeaders.UserAgent
+                .ParseAdd("DellWarrantyScanner/" + current.ToString(3));
+            http.DefaultRequestHeaders.Accept
+                .ParseAdd("application/vnd.github+json");
+
+            var json = await http.GetStringAsync(apiUrl);
+            var obj  = Newtonsoft.Json.Linq.JObject.Parse(json);
+
+            string tagName = obj["tag_name"]?.ToString() ?? "";
+            string cleanTag = tagName.TrimStart('v', 'V');
+
+            if (!Version.TryParse(cleanTag, out var latest))
+            {
+                if (userTriggered)
+                    MessageBox.Show("Could not read the version from GitHub.\n\nCheck manually at:\n" + releasesUrl,
+                        "Update Check", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (latest > current)
+            {
+                var result = MessageBox.Show(
+                    $"A new version is available!\n\n" +
+                    $"  Current:   v{current.ToString(3)}\n" +
+                    $"  Available: {tagName}\n\n" +
+                    "Open the releases page to download?",
+                    "Update Available",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Information);
+
+                if (result == DialogResult.Yes)
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        { FileName = releasesUrl, UseShellExecute = true });
+            }
+            else if (userTriggered)
+            {
+                MessageBox.Show($"You're up to date!  (v{current.ToString(3)})",
+                    "Check for Updates", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+            UpdateStatus(latest > current
+                ? $"Update available: {tagName}"
+                : "Ready.");
+        }
+        catch (Exception ex) when (!userTriggered)
+        {
+            // Silent background check — swallow network errors
+            _ = ex;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Could not check for updates:\n\n{ex.Message}",
+                "Update Check Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            UpdateStatus("Ready.");
+        }
     }
 
     private void OpenSettings(object? sender, EventArgs e)
