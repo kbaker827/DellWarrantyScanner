@@ -8,9 +8,9 @@
     <AssemblyName>DellWarrantyScanner</AssemblyName>
     <RootNamespace>DellWarrantyScanner</RootNamespace>
     <ApplicationIcon>Resources\app.ico</ApplicationIcon>
-    <Version>1.0.0</Version>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
     <Company>ONWASA</Company>
     <Product>Dell Warranty Scanner</Product>
     <Copyright>Copyright © 2026 kbaker827</Copyright>
