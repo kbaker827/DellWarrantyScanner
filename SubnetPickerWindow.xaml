@@ -1,0 +1,24 @@
+<Window x:Class="DellWarrantyScanner.SubnetPickerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Select Network Adapter"
+        Width="440" Height="150"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackground}">
+    <DockPanel Margin="12">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Content="Use This" Width="100" Height="30"
+                    IsDefault="True" Click="UseThis_Click"
+                    Background="{DynamicResource AccentBrush}"
+                    Foreground="{DynamicResource AccentForeground}"
+                    BorderThickness="0"/>
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top"
+                   Text="Multiple adapters found. Choose one:"
+                   Margin="0,0,0,8"
+                   Foreground="{DynamicResource TextPrimary}"/>
+        <ComboBox x:Name="_combo" VerticalAlignment="Top"/>
+    </DockPanel>
+</Window>
