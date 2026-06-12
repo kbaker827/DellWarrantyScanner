@@ -9,6 +9,7 @@ public partial class App : Application
     {
         base.OnStartup(e);
         ThemeService.Initialize();
+        new MainWindow().Show();
     }
 
     protected override void OnExit(ExitEventArgs e)
