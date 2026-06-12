@@ -1,0 +1,74 @@
+<Window x:Class="DellWarrantyScanner.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About Dell Warranty Scanner"
+        Width="420" Height="300"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackground}">
+    <Grid Margin="24">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="64"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Image Grid.Column="0" Grid.Row="0" Grid.RowSpan="2"
+               Source="pack://application:,,,/Resources/app.ico"
+               Width="48" Height="48" VerticalAlignment="Top"/>
+
+        <TextBlock Grid.Column="1" Grid.Row="0"
+                   Text="Dell Warranty Scanner"
+                   FontSize="18" FontWeight="SemiBold"
+                   Foreground="{DynamicResource TextPrimary}"/>
+
+        <TextBlock Grid.Column="1" Grid.Row="1" x:Name="_txtVersion"
+                   FontSize="12" Margin="0,4,0,0"
+                   Foreground="{DynamicResource TextSecondary}"/>
+
+        <Separator Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2"
+                   Margin="0,12,0,12"
+                   Background="{DynamicResource BorderBrush}"/>
+
+        <TextBlock Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2"
+                   Text="Scans your network for Dell systems and retrieves warranty expiration dates via the Dell TechDirect API."
+                   TextWrapping="Wrap" FontSize="13"
+                   Foreground="{DynamicResource TextPrimary}"/>
+
+        <StackPanel Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="0,12,0,0">
+            <TextBlock Text="Source &amp; Releases:"
+                       FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
+            <TextBlock Margin="0,4,0,0" FontSize="12">
+                <Hyperlink NavigateUri="https://github.com/kbaker827/DellWarrantyScanner"
+                           RequestNavigate="Hyperlink_RequestNavigate">
+                    https://github.com/kbaker827/DellWarrantyScanner
+                </Hyperlink>
+            </TextBlock>
+        </StackPanel>
+
+        <TextBlock Grid.Column="0" Grid.Row="5" Grid.ColumnSpan="2"
+                   x:Name="_txtCopyright"
+                   FontSize="11" VerticalAlignment="Bottom"
+                   Foreground="{DynamicResource TextSecondary}"/>
+
+        <StackPanel Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="2"
+                    Orientation="Horizontal" HorizontalAlignment="Right"
+                    Margin="0,12,0,0">
+            <Button Content="View Releases" Width="110" Height="30"
+                    Margin="0,0,8,0" Click="ViewReleases_Click"/>
+            <Button Content="Close" Width="90" Height="30" IsDefault="True"
+                    Click="Close_Click"
+                    Background="{DynamicResource AccentBrush}"
+                    Foreground="{DynamicResource AccentForeground}"
+                    BorderThickness="0"/>
+        </StackPanel>
+    </Grid>
+</Window>
