@@ -32,12 +32,15 @@ public static class ThemeService
         return value is int i && i == 0;
     }
 
+    private static ResourceDictionary? _activeTheme;
+
     private static void Apply(bool dark)
     {
         var dict = Application.Current.Resources.MergedDictionaries;
-        dict.Clear();
+        if (_activeTheme != null) dict.Remove(_activeTheme);
         var uri = new Uri(dark ? "Themes/Dark.xaml" : "Themes/Light.xaml", UriKind.Relative);
-        dict.Add(new ResourceDictionary { Source = uri });
+        _activeTheme = new ResourceDictionary { Source = uri };
+        dict.Add(_activeTheme);
         ThemeChanged?.Invoke(null, EventArgs.Empty);
     }
 }
