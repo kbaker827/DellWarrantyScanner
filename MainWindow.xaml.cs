@@ -16,6 +16,10 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<DeviceInfo> _scanResults = new();
     private readonly ObservableCollection<DeviceInfo> _tagResults = new();
     private CancellationTokenSource? _cts;
+    private static readonly System.Net.Http.HttpClient _httpClient = new()
+    {
+        Timeout = TimeSpan.FromSeconds(10)
+    };
 
     public MainWindow()
     {
@@ -23,11 +27,7 @@ public partial class MainWindow : Window
 
         _settings = AppSettings.Load();
 
-        ThemeService.ThemeChanged += (_, _) =>
-        {
-            _scanGrid.Items.Refresh();
-            _tagGrid.Items.Refresh();
-        };
+        ThemeService.ThemeChanged += OnThemeChanged;
 
         _scanGrid.ItemsSource = _scanResults;
         _tagGrid.ItemsSource = _tagResults;
@@ -139,6 +139,7 @@ public partial class MainWindow : Window
         _scanResults.Clear();
         _tabs.SelectedIndex = 0;
 
+        _cts?.Dispose();
         _cts = new CancellationTokenSource();
         var ct = _cts.Token;
 
@@ -202,6 +203,8 @@ public partial class MainWindow : Window
             SetScanState(false);
             _progress.IsIndeterminate = false;
             _progress.Value = 0;
+            _cts?.Dispose();
+            _cts = null;
         }
     }
 
@@ -252,6 +255,7 @@ public partial class MainWindow : Window
         foreach (var t in tags)
             _tagResults.Add(new DeviceInfo { ServiceTag = t, WarrantyStatus = "Pending" });
 
+        _cts?.Dispose();
         _cts = new CancellationTokenSource();
 
         try
@@ -287,6 +291,8 @@ public partial class MainWindow : Window
             SetTagLookupState(false);
             _progress.IsIndeterminate = false;
             _progress.Value = 0;
+            _cts?.Dispose();
+            _cts = null;
         }
     }
 
@@ -327,7 +333,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        var rows = lines.Select(ParseCsvLine).Where(r => r.Length > 0).ToList();
+        var rows = lines.Where(l => !string.IsNullOrWhiteSpace(l)).Select(ParseCsvLine).Where(r => r.Length > 0).ToList();
         if (rows.Count == 0)
         {
             MessageBox.Show("No data found in the file.", "Import",
@@ -438,11 +444,11 @@ public partial class MainWindow : Window
 
     private void ExportCsv(object sender, RoutedEventArgs e)
     {
-        var source = _tabs.SelectedIndex == 0
+        List<DeviceInfo> source = (_tabs.SelectedIndex == 0
             ? (IEnumerable<DeviceInfo>)_scanResults
-            : _tagResults;
+            : _tagResults).ToList();
 
-        if (!source.Any())
+        if (source.Count == 0)
         {
             MessageBox.Show("No results to export on the active tab.", "Export",
                 MessageBoxButton.OK, MessageBoxImage.Information);
@@ -476,8 +482,7 @@ public partial class MainWindow : Window
         }
 
         File.WriteAllText(dlg.FileName, sb.ToString(), Encoding.UTF8);
-        var sourceList = source.ToList();
-        MessageBox.Show($"Exported {sourceList.Count} record(s) to:\n{dlg.FileName}",
+        MessageBox.Show($"Exported {source.Count} record(s) to:\n{dlg.FileName}",
             "Export Complete", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
@@ -587,12 +592,12 @@ public partial class MainWindow : Window
 
         try
         {
-            using var http = new System.Net.Http.HttpClient();
-            http.Timeout = TimeSpan.FromSeconds(10);
-            http.DefaultRequestHeaders.UserAgent.ParseAdd("DellWarrantyScanner/" + current.ToString(3));
-            http.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
-
-            var json = await http.GetStringAsync(apiUrl);
+            using var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, apiUrl);
+            request.Headers.UserAgent.ParseAdd("DellWarrantyScanner/" + current.ToString(3));
+            request.Headers.Accept.ParseAdd("application/vnd.github+json");
+            using var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
             var obj  = Newtonsoft.Json.Linq.JObject.Parse(json);
 
             string tagName  = obj["tag_name"]?.ToString() ?? "";
@@ -657,5 +662,18 @@ public partial class MainWindow : Window
             _progress.IsIndeterminate = false;
             _progress.Value = progress.Value;
         }
+    }
+
+    private void OnThemeChanged(object? sender, EventArgs e)
+    {
+        _scanGrid.Items.Refresh();
+        _tagGrid.Items.Refresh();
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        ThemeService.ThemeChanged -= OnThemeChanged;
+        _cts?.Dispose();
+        base.OnClosed(e);
     }
 }
