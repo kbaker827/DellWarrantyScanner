@@ -1,0 +1,30 @@
+<Window x:Class="DellWarrantyScanner.CsvColumnPickerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Select Column"
+        Width="440" Height="200"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackground}">
+    <DockPanel Margin="12">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Content="Cancel" Width="90" Height="30"
+                    Margin="0,0,8,0" IsCancel="True" Click="Cancel_Click"/>
+            <Button Content="Import" Width="90" Height="30"
+                    IsDefault="True" Click="Import_Click"
+                    Background="{DynamicResource AccentBrush}"
+                    Foreground="{DynamicResource AccentForeground}"
+                    BorderThickness="0"/>
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top"
+                   Text="Which column contains the service tags?"
+                   Margin="0,0,0,8"
+                   Foreground="{DynamicResource TextPrimary}"/>
+        <TextBlock DockPanel.Dock="Bottom" x:Name="_lblPreview"
+                   FontSize="11" Margin="0,6,0,0"
+                   Foreground="{DynamicResource TextSecondary}"/>
+        <ComboBox x:Name="_combo" VerticalAlignment="Top"
+                  SelectionChanged="Combo_SelectionChanged"/>
+    </DockPanel>
+</Window>
