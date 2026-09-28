@@ -1,0 +1,35 @@
+name: Build Windows release zip
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out the release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Set up .NET 9 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Publish win-x64 (framework-dependent)
+        run: dotnet publish -c Release -r win-x64 -o publish
+
+      - name: Zip the publish output
+        shell: pwsh
+        run: Compress-Archive -Path publish/* -DestinationPath "DellWarrantyScanner-${{ github.event.release.tag_name }}-win-x64.zip"
+
+      - name: Attach zip to the release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.event.release.tag_name }}" "DellWarrantyScanner-${{ github.event.release.tag_name }}-win-x64.zip" --clobber
