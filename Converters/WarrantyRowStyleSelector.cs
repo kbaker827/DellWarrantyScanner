@@ -13,10 +13,9 @@ public class WarrantyRowStyleSelector : StyleSelector
 
         string key = device.WarrantyStatus switch
         {
-            "Expired" => "RowStyleExpired",
-            "Active" when device.DaysRemaining.HasValue && device.DaysRemaining.Value < 90
-                => "RowStyleExpiringSoon",
-            "Active" => "RowStyleActive",
+            WarrantyStatus.Expired => "RowStyleExpired",
+            WarrantyStatus.Active when device.IsExpiringSoon => "RowStyleExpiringSoon",
+            WarrantyStatus.Active => "RowStyleActive",
             _ => "RowStyleDefault"
         };
 

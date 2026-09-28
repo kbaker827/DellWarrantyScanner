@@ -1,5 +1,6 @@
 using DellWarrantyScanner.Models;
-using System.Diagnostics;
+using DellWarrantyScanner.Services;
+using System.IO;
 using System.Windows;
 using System.Windows.Navigation;
 
@@ -40,16 +41,26 @@ public partial class SettingsWindow : Window
         _settings.UseCurrentCredentials = _rbCurrentUser.IsChecked == true;
         _settings.WmiUsername           = _txtWmiUser.Text.Trim();
         _settings.WmiPassword           = _txtWmiPass.Password;
-        _settings.Save();
+
+        try
+        {
+            _settings.Save();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            MessageBox.Show($"Could not save settings:\n\n{ex.Message}", "Settings",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
         DialogResult = true;
-        Close();
     }
 
     private void Cancel_Click(object sender, RoutedEventArgs e) => Close();
 
     private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
     {
-        Process.Start(new ProcessStartInfo { FileName = e.Uri.AbsoluteUri, UseShellExecute = true });
+        UrlLauncher.Open(e.Uri.AbsoluteUri);
         e.Handled = true;
     }
 }

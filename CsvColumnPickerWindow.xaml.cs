@@ -1,3 +1,4 @@
+using DellWarrantyScanner.Services;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -16,20 +17,13 @@ public partial class CsvColumnPickerWindow : Window
 
         string[] headers = rows[0];
 
-        int suggested = 0;
-        for (int i = 0; i < headers.Length; i++)
-        {
-            string h = headers[i].ToLowerInvariant();
-            if (h.Contains("tag") || h.Contains("serial") || h.Contains("asset"))
-            {
-                suggested = i;
-                break;
-            }
-        }
+        int suggested = Math.Max(0, Array.FindIndex(headers, CsvHelper.LooksLikeTagHeader));
 
         for (int i = 0; i < columnCount; i++)
         {
-            string header = i < headers.Length ? headers[i].Trim() : $"Column {i + 1}";
+            string header = i < headers.Length && headers[i].Trim().Length > 0
+                ? headers[i].Trim()
+                : $"Column {i + 1}";
             string preview = rows.Skip(1).Take(3)
                 .Where(r => r.Length > i)
                 .Select(r => r[i].Trim())

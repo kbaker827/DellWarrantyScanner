@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using DellWarrantyScanner.Services;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Navigation;
@@ -23,12 +23,12 @@ public partial class AboutWindow : Window
 
     private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
     {
-        Process.Start(new ProcessStartInfo { FileName = e.Uri.AbsoluteUri, UseShellExecute = true });
+        UrlLauncher.Open(e.Uri.AbsoluteUri);
         e.Handled = true;
     }
 
     private void ViewReleases_Click(object sender, RoutedEventArgs e) =>
-        Process.Start(new ProcessStartInfo { FileName = ReleasesUrl, UseShellExecute = true });
+        UrlLauncher.Open(ReleasesUrl);
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
 }

@@ -14,6 +14,7 @@ A standalone Windows desktop application that scans your network for Dell system
 - **Export to CSV** — export results from either tab
 - **Auto-detect IP range** — reads your local network adapter and pre-fills the subnet
 - **Stop at any time** — cancel a running scan or lookup mid-flight and keep partial results
+- **Light & dark theme** — follows your Windows app theme automatically
 - **Standalone .exe** — no installation or .NET runtime required on the target machine
 
 ---
@@ -30,7 +31,7 @@ Warranty lookups require a free API key from Dell TechDirect:
 4. Copy your **Client ID** and **Client Secret**
 5. In the app: **Tools → Settings** → paste them in
 
-Credentials are saved to `%APPDATA%\DellWarrantyScanner\settings.json`.
+Settings are saved to `%APPDATA%\DellWarrantyScanner\settings.json`. The Client Secret and WMI password are encrypted with Windows DPAPI, so only your Windows account can read them.
 
 ### WMI Access (for Network Scan)
 
@@ -46,15 +47,18 @@ The network scan uses WMI to query remote Windows machines for manufacturer and 
    - `192.168.1.0/24` — CIDR notation
    - `10.0.0.1-254` — short range (last octet)
    - `10.0.0.1-10.0.0.100` — full range
+   - `10.0.0.5` — single address
+   - Up to 65,536 addresses per scan
 2. Click **Auto-detect** to pre-fill the range from your local adapter
 3. Click **Scan Network**
 4. Results appear as they're found; click **Stop Scan** to halt early
 
 ### Service Tag Lookup Tab
 
-1. Type tags directly into the text box — one per line, or comma/space separated
+1. Type tags directly into the text box — one per line, or comma/semicolon/space separated (5–7 letters and digits, up to 100 per lookup)
 2. **Or** click **Import from CSV...** to load tags from a spreadsheet:
-   - Single-column files are imported automatically
+   - Single-column files are imported automatically (a header row like `Service Tag` is skipped)
+   - Comma, semicolon and tab-delimited files are supported
    - Multi-column files show a column picker with a live preview
 3. Click **Look Up Warranty**
 
@@ -96,20 +100,28 @@ The compiled exe will be at `publish\DellWarrantyScanner.exe` (~115 MB, no depen
 
 ```
 DellWarrantyScanner/
-├── Program.cs                  # Entry point
-├── MainForm.cs                 # Main window and all UI logic
-├── SettingsForm.cs             # Settings dialog
+├── App.xaml(.cs)                 # Entry point, theme setup, global error handler
+├── MainWindow.xaml(.cs)          # Main window: scan, tag lookup, CSV import/export
+├── SettingsWindow.xaml(.cs)      # API and WMI credentials
+├── AboutWindow.xaml(.cs)         # About dialog
+├── SubnetPickerWindow.xaml(.cs)  # Adapter picker for auto-detect
+├── CsvColumnPickerWindow.xaml(.cs) # Column picker for multi-column CSV import
 ├── Models/
-│   ├── AppSettings.cs          # Settings persistence
-│   └── DeviceInfo.cs           # Result row model
+│   ├── AppSettings.cs            # Settings persistence (secrets encrypted with DPAPI)
+│   ├── DeviceInfo.cs             # Result row model and warranty status values
+│   └── ServiceTags.cs            # Service tag parsing and validation
 ├── Services/
-│   ├── NetworkScanner.cs       # Ping sweep, WMI queries, subnet detection
-│   └── DellWarrantyService.cs  # Dell TechDirect OAuth2 + warranty API
+│   ├── NetworkScanner.cs         # IP range parsing, ping sweep, WMI queries, subnet detection
+│   ├── DellWarrantyService.cs    # Dell TechDirect OAuth2 + warranty API
+│   ├── CsvHelper.cs              # CSV parsing and safe export escaping
+│   ├── ThemeService.cs           # Light/dark theme switching
+│   └── UrlLauncher.cs            # Opens links in the default browser
+├── Converters/
+│   └── WarrantyRowStyleSelector.cs # Row colours by warranty status
+├── Themes/                       # Light.xaml / Dark.xaml colour resources
 ├── Resources/
-│   └── app.ico                 # Embedded application icon
-└── IconGen/                    # Small utility that generates app.ico
-    ├── IconGen.csproj
-    └── Program.cs
+│   └── app.ico                   # Application icon
+└── IconGen/                      # Small utility that generates app.ico
 ```
 
 ---
