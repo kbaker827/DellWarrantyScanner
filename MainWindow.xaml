@@ -75,14 +75,14 @@
                             BorderThickness="0"/>
                     <Button x:Name="_btnStopScan" Content="Stop Scan"
                             Width="90" Height="30" Margin="0,0,4,0"
-                            IsEnabled="False" Click="StopScan_Click"
+                            IsEnabled="False" Click="Stop_Click"
                             Background="{DynamicResource DangerBrush}"
                             Foreground="{DynamicResource DangerForeground}"
                             BorderThickness="0"/>
-                    <Button Content="Auto-detect" Width="90" Height="30"
+                    <Button x:Name="_btnAutoDetect" Content="Auto-detect" Width="90" Height="30"
                             Margin="0,0,4,0" Click="AutoDetect_Click"/>
-                    <Button Content="Export CSV" Width="96" Height="30"
-                            Click="ExportCsv"/>
+                    <Button x:Name="_btnExport" Content="Export CSV" Width="96" Height="30"
+                            IsEnabled="False" Click="ExportCsv"/>
                 </WrapPanel>
                 <TextBlock Margin="82,4,0,0" FontSize="10"
                            Foreground="{DynamicResource TextSecondary}"
@@ -137,7 +137,8 @@
         </StackPanel>
 
         <!-- Tab control -->
-        <TabControl x:Name="_tabs" Background="{DynamicResource AppBackground}">
+        <TabControl x:Name="_tabs" Background="{DynamicResource AppBackground}"
+                    SelectionChanged="Tabs_SelectionChanged">
 
             <!-- Network Scan tab -->
             <TabItem Header="  Network Scan Results  ">
@@ -215,16 +216,16 @@
                                         Background="{DynamicResource AccentBrush}"
                                         Foreground="{DynamicResource AccentForeground}"
                                         BorderThickness="0"/>
-                                <Button Content="Import from CSV..."
+                                <Button x:Name="_btnImportCsv" Content="Import from CSV..."
                                         Width="148" Height="30" Margin="0,0,0,4"
                                         Click="ImportCsv_Click"/>
                                 <Button x:Name="_btnStopLookup" Content="Stop"
                                         Width="148" Height="30" Margin="0,0,0,4"
-                                        IsEnabled="False" Click="StopLookup_Click"
+                                        IsEnabled="False" Click="Stop_Click"
                                         Background="{DynamicResource DangerBrush}"
                                         Foreground="{DynamicResource DangerForeground}"
                                         BorderThickness="0"/>
-                                <Button Content="Clear" Width="148" Height="30"
+                                <Button x:Name="_btnClearTags" Content="Clear" Width="148" Height="30"
                                         Click="ClearTags_Click"/>
                             </StackPanel>
                         </Grid>

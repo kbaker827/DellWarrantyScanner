@@ -20,8 +20,9 @@ public static class ThemeService
 
     private static void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
     {
+        // Raised on a background thread; BeginInvoke avoids blocking it on the UI thread.
         if (e.Category == UserPreferenceCategory.General)
-            Application.Current.Dispatcher.Invoke(() => Apply(IsDarkMode()));
+            Application.Current?.Dispatcher.BeginInvoke(() => Apply(IsDarkMode()));
     }
 
     private static bool IsDarkMode()
